@@ -34,7 +34,7 @@ Get-EventLog -LogName Application -Source IIS-APPHOSTSVC -InstanceId 9009
 
 #there should be no entries
 Write-verbose "Checking OABGenerator logs"
-findstr /snip /c:"Download failed and temporary file" "%PROGRAMFILES%\Microsoft\Exchange Server\V15\Logging\OABGeneratorLog\*.log"
+findstr /snip /c:"Download failed and temporary file" "%ExchangeInstallPath%\Logging\OABGeneratorLog\*.log"
 
 #there should be no events
 Write-verbose "Checking Unified Message event logs"
@@ -42,7 +42,7 @@ Get-EventLog -LogName Application -Source "MSExchange Unified Messaging" -EntryT
 
 #this should be blank
 Write-verbose "Checking for Set-VirtualDirectory indicators"
-Select-String -Path "$env:PROGRAMFILES\Microsoft\Exchange Server\V15\Logging\ECP\Server\*.log" -Pattern 'Set-.+VirtualDirectory'
+Select-String -Path "$env:ExchangeInstallPath\Logging\ECP\Server\*.log" -Pattern 'Set-.+VirtualDirectory'
 
 #read all the IIS logs looking for POST requests to /owa/auth/Current/themes/resources/
 Write-verbose "Checking for theme resource indicators"
@@ -59,7 +59,7 @@ write-host $line -ForegroundColor DarkYellow
 #IOC check from mS blog CVE-2021-26855
 #Import-Csv -Path (Get-ChildItem -Recurse -Path "$env:PROGRAMFILES\Microsoft\Exchange Server\V15\Logging\HttpProxy" -Filter '*.log').FullName | Where-Object {  $_.AuthenticatedUser -eq '' -and $_.AnchorMailbox -like 'ServerInfo~*/*' } | select DateTime, AnchorMailbox
 # this totally broke on a live exchange box so i re-wrote my own detection method (tread carefully)
-$files = Get-ChildItem -Recurse "$env:PROGRAMFILES\Microsoft\Exchange Server\V15\Logging\HttpProxy\*.log"
+$files = Get-ChildItem -Recurse "$env:ExchangeInstallPath\Logging\HttpProxy\*.log"
 
 foreach($file in $files)
 {
@@ -83,7 +83,7 @@ read-host -Prompt "press enter to continue"
 Get-ChildItem -Path C:\inetpub\wwwroot\aspnet_client\ -Recurse -Filter "*.aspx"
 
 # look for odd aspx files (deafult names are "errorFE.aspx", "ExpiredPassword.aspx","frowny.aspex","logoff.aspx","logon.aspx","OutlookCN.aspx"."RedirSuiteServiceProxy.aspx",signout.aspx"
-Get-ChildItem -Path "C:\Program Files\Microsoft\Exchange Server\V15\FrontEnd\HttpProxy\owa\auth\" -Recurse -Filter "*.aspx*"
+Get-ChildItem -Path "$env:ExchangeInstallPath\FrontEnd\HttpProxy\owa\auth\" -Recurse -Filter "*.aspx*"
 
 
 #if anytihng is found then investigate - this is not a fully developed script - use at own risk. check the mS docs.
